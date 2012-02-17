@@ -1,0 +1,40 @@
+#!/bin/bash -e
+
+if git branch | grep "* master" >/dev/null; then
+	echo -n "Please name your branch (e.g. nikita/master): "
+	read BRANCH_NAME
+	git checkout -b $BRANCH_NAME
+	git branch -d master
+fi
+
+echo "Fetching commits from repository..."
+git fetch origin
+
+CAN_PULL_SAFELY=1
+if git log origin/master..HEAD | grep commit >/dev/null; then
+	CAN_PULL_SAFELY=0
+fi
+
+NEED_TO_PULL=0
+if git log HEAD..origin/master | grep commit >/dev/null; then
+	NEED_TO_PULL=1
+fi
+
+case ${CAN_PULL_SAFELY}x${NEED_TO_PULL} in
+	1x1)
+		echo "Pulling in new commits from master branch..."
+		git pull origin master
+		echo "Sync successful"
+		;;
+	1x0)
+		echo "Already up-to-date"
+		;;
+	0x1)
+		git push origin HEAD
+		echo "Cannot pull until your commits are integrated into master"
+		;;
+	0x0)
+		git push origin HEAD
+		echo "Your commits are not yet integrated into master."
+		;;
+esac
