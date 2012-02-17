@@ -8,12 +8,11 @@ WINDOW_WIDTH = 24 # search window width
 WINDOW_HEIGHT = 24 # search window height
 THRESHOLD= 0.2
 
-object_x0 = 60
-object_y0 = 70
-is_tracking = False
-
-
 frame = cv.QueryFrame(camcapture)
+
+object_x0 = cv.GetSize(frame)[0] // 2
+object_y0 = cv.GetSize(frame)[1] // 2
+is_tracking = False
 
 gray = cv.CreateImage(cv.GetSize(frame), cv.IPL_DEPTH_8U, 1)
 cv.CvtColor(frame, gray, cv.CV_RGB2GRAY)
@@ -39,12 +38,15 @@ def get_rect(img, rect):
 
 def trackobject(img, frame):
     global object_x0, object_y0, is_tracking
-    window = cv.GetSubRect(img, (object_x0, object_y0, WINDOW_WIDTH, WINDOW_HEIGHT))
+    object_x0 -= (WINDOW_WIDTH - TPL_WIDTH) // 2
+    object_y0 -= (WINDOW_HEIGHT - TPL_HEIGHT) // 2
+    rect = get_rect(img, (object_x0, object_y0, WINDOW_WIDTH, WINDOW_HEIGHT))
+    window = cv.GetSubRect(img, rect)
     cv.MatchTemplate(window, tpl, tm, cv.CV_TM_SQDIFF_NORMED)
     minval, maxval, minloc, maxloc = cv.MinMaxLoc(tm)
+    print cv.MinMaxLoc(tm)
     if minval <= THRESHOLD:
-        rect = get_rect(img, (minloc[0] + object_x0 - TPL_WIDTH // 2,
-                              minloc[1] + object_y0 - TPL_HEIGHT // 2,
+        rect = get_rect(img, (minloc[0] + object_x0, minloc[1] + object_y0,
                               WINDOW_WIDTH, WINDOW_HEIGHT))
         object_x0 = rect[0]
         object_y0 = rect[1]
@@ -61,8 +63,6 @@ def trackobject(img, frame):
 def mousecallback(event, x, y, flags, param):
     global gray, is_tracking, object_x0, object_y0, tpl
     if event == cv.CV_EVENT_LBUTTONUP:
-        object_x0 = x - TPL_WIDTH // 2
-        object_y0 = y - TPL_HEIGHT // 2
         rect = get_rect(gray, (x - TPL_WIDTH // 2, y - TPL_HEIGHT // 2,
                                WINDOW_WIDTH, WINDOW_HEIGHT))
         object_x0 = rect[0]
