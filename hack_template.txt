@@ -1,0 +1,86 @@
+Function detect_gestures(Positions, detected_gestures)
+	Input:
+		Positions - a list of the previous positions (100-200 points or so?) of all the fingers and the time the recordings occured.
+			In the form: [([finger0, finger1, ...fingerX], time0), (..., time1), ...] (for x fingers - hopefully 10)
+	Globals:
+		GESTURE_THRESHOLD - the threshold for similarity between a gesture and a list of points
+		Gestures - a list of the gestures in some form (lines/arcs?) with their delay listed
+	Output:
+		A list of gestures detected, in the form [(gesture_index0, gesture_delay0), gesture1, ...] (empty if no gestures are detected)
+		Avoids all gestures which are already being executed?
+	Notes:
+		for every continuous sublist to the end (Positions[0:], Positions[1:], etc), check each against a gesture?
+
+Function load_image(camcapture)
+	Input:
+		camcapture - the cv webcam capture object
+	Output:
+		img - the img from camcapture
+	Notes:
+		this functions might be unnecessary - it's just one cv call (return camcapture.QueryImage())
+
+Function detect_fingers(image)
+	Input:
+		image - the image loaded from the camera
+	Output:
+		a list of fingers detected. Preferably all 10. In the form: [(f0x, f0y), (f1x, f1y), ... ]
+		or False if failed.
+	Notes:
+		Ideally this will only be run until all necessary fingers are found, then switching to track_fingers.
+		May take a global variable for the number of fingers to track
+
+Function track_fingers(prev_Positions, image)
+	Input:
+		prev_Positions - a list of the last known positions of the fingers, in the form [finger0, finger1, ... fingerX]
+		image - the image loaded from the camera
+	Output:
+		A list of the new positions of the fingers, with False placed if a finger isn't found., e.g. [finger0, False, finger2, ...]
+	Notes:
+		May just make len(prev_Positions) calls to a track_object function, however that risks the problem of getting two fingers with the same position
+		(losing one)
+
+Function execture_gestures(gestures)
+	Input:
+		gestures - a list of gestures detected from the image (same format as detect_gestures)
+	Output:
+		Nothing, but executes gestures whose time_left has gone below 0
+		
+Function detect_cancelled()
+	Input: None
+	Globals:
+		any keypresses, mouse clicks, etc. - loaded in some listener thread.
+	Output:
+		time of last cancel command (to cancel all gestures activated near that), -1 for no cancel command.
+		
+Function remove_cancelled(gestures, time_cancel)
+	Input:
+		gestures - a list of gestures detected from the image (same format as detect_gestures)
+		time_cancel - tiem of last cancel command (same format as detect_cancelled)
+	Output:
+		a list of gestures which were not activated near the cancel command
+	Notes:
+		This will probably draw on a lot of global variables, such as the gesture_delay, and the time_length of the gesture (how long it takes to make)
+
+Sample main code:		
+# Instantiate a lot of variables here
+While True:
+	img = load_image(camcapture)
+	if not is_tracking:
+		fingers = detect_fingers(img)
+		if fingers != False:
+			is_tracking == True
+			past_positions = []
+	if is_tracking:
+		past_positions += [fingers]
+		if len(past_positions) > past_store_count:
+			past_positions = past_positions[1:]
+			gestures_detected = [(gesture[0], gesture[1] - (time() - timer) for gesture in gestures_detected]
+			gestures_detected = detect_gestures(past_positions, gestures_detected)
+			timer = time() # Note - for windows, "from time import clock as time" otherwise "from time import time"
+		if len(gestures) > 0: # Note - gestures should be initialized to an empty list
+			time_cancel = detect_cancelled()
+			if time_cancel != -1:
+				gestures_detected = remove_gestures(gestures_detected, time_cancel)
+			execute_gestures(gestures)
+	if cv.WaitKey(10) == 27:
+		break
