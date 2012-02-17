@@ -1,0 +1,22 @@
+Define classes named 'TrackerIn' and 'TrackerOut'.
+Finger detection has an instance of TrackerIn, and gesture recognition has an instance of TrackerOut
+
+Public API is:
+def TrackerIn.add_positions(positions, time=NOW):
+	"""Arguments:
+	:param tuple positions: A list [finger0, finger1, ..., finger9] where each finger is a tuple [x, y] of the finger's coordinates
+	:param datetime time: by default, the position is timestamped with the current time, but this can be overriden
+
+
+TrackerOut.flush():
+	"""Reads the most recent data from the tracker input"""
+
+TrackerOut.clear():
+	"""Clears the list of positions"""
+
+TrackerOut[-1]:
+    """Returns the most recent finger positions, as a tuple (timestamp, [finger0... finger9])
+	E.g. time, positions = TrackerOut[-1]
+	"""
+TrackerOut.time_slice(start_time, end_time = NOW):
+	"""Returns a list of the finger positions between a given starting time and ending time"""
