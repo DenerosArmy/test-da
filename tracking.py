@@ -29,11 +29,11 @@ def get_rect(img, rect):
     if rect[0] + rect[2] > w:
         rect = (w - rect[2], rect[1], rect[2], rect[3])
     elif rect[0] < 0:
-        rect = (0, rect[1], rect[2] - rect[0], rect[3])
+        rect = (0, rect[1], rect[2], rect[3])
     if rect[1] + rect[3] > h:
         rect = (rect[0], h - rect[3], rect[2], rect[3])
     elif rect[1] < 0:
-        rect = (rect[0], 0, rect[2], rect[3] - rect[1])
+        rect = (rect[0], 0, rect[2], rect[3])
     return rect
 
 def trackobject(img, frame):
@@ -44,7 +44,7 @@ def trackobject(img, frame):
     window = cv.GetSubRect(img, rect)
     cv.MatchTemplate(window, tpl, tm, cv.CV_TM_SQDIFF_NORMED)
     minval, maxval, minloc, maxloc = cv.MinMaxLoc(tm)
-    print cv.MinMaxLoc(tm)
+    print(cv.MinMaxLoc(tm))
     if minval <= THRESHOLD:
         rect = get_rect(img, (minloc[0] + object_x0, minloc[1] + object_y0,
                               WINDOW_WIDTH, WINDOW_HEIGHT))
