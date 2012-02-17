@@ -12,7 +12,7 @@ class ColorTracker:
         while True:
             img = cv.QueryFrame( self.capture )
             #blur the source image to reduce color noise
-            cv.Smooth(img, img, cv.CV_BLUR, 3);
+            #cv.Smooth(img, img, cv.CV_BLUR, 3);
 
             #convert the image to hsv(Hue, Saturation, Value) so its
             #easier to determine the color to track(hue)
@@ -28,9 +28,9 @@ class ColorTracker:
 
             #determine the objects moments and check that the area is large  
             #enough to be our object
-            moments = cv.Moments(thresholded_img, 0)
-            area = cv.GetCentralMoment(moments, 0, 0)
-
+            #moments = cv.Moments(thresholded_img, 0)
+            #area = cv.GetCentralMoment(thresholded_img, 0, 0)
+            """
             #there can be noise in the video so ignore objects with small areas
             if(area > 100000):
                 #determine the x and y coordinates of the center of the object
@@ -48,6 +48,7 @@ class ColorTracker:
                 #add the thresholded image back to the img so we can see what was
                 #left after it was applied
                 cv.Merge(thresholded_img, None, None, None, img)
+            """
 
             #display the image
             cv.ShowImage(color_tracker_window, img)
